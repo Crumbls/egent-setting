@@ -32,7 +32,10 @@ class SettingServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        return;
+	    $this->bootRoutes();
+	    $this->loadViewsFrom(__DIR__ . '/Views', 'setting');
+
+	    return;
         /*
         Event::listen('*', function ($eventName, array $data) {
             //
@@ -40,9 +43,7 @@ class SettingServiceProvider extends ServiceProvider
         });
         */
         // ... other things
-        $this->bootRoutes();
         $this->bootComponents();
-        $this->loadViewsFrom(__DIR__ . '/Views', 'notification');
         $this->commands([
             InstallCommand::class,
         ]);
