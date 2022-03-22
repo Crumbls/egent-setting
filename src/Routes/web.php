@@ -7,13 +7,14 @@ Route::group([
 	'as' => 'settings.messages.'
 ], function() {
 	Route::get('/', \Egent\Setting\Http\Controllers\Messaging\IndexController::class)->name('index');
-	Route::get('create', \Egent\Setting\Http\Controllers\Messaging\CreateController::class)->name('create');
-	Route::post('', \Egent\Setting\Http\Controllers\Messaging\StoreController::class)->name('store');
-	Route::get('{message}', \Egent\Setting\Http\Controllers\Messaging\ShowController::class)->name('show');
-	Route::get('{message}/edit', \Egent\Setting\Http\Controllers\Messaging\EditController::class)->name('edit');
-	Route::patch('{message}', \Egent\Setting\Http\Controllers\Messaging\UpdateController::class)->name('update');
-	Route::get('{message}/delete', \Egent\Setting\Http\Controllers\Messaging\DeleteController::class)->name('delete');
-	Route::delete('{message}', \Egent\Setting\Http\Controllers\Messaging\DestroyController::class)->name('destroy');
+//	Route::get('create', \Egent\Setting\Http\Controllers\Messaging\CreateController::class)->name('create');
+//	Route::post('/', \Egent\Setting\Http\Controllers\Messaging\StoreController::class)->name('store');
+	Route::post('/', \Egent\Setting\Http\Controllers\Messaging\UpdateController::class)->name('store');
+//	Route::get('{message}', \Egent\Setting\Http\Controllers\Messaging\ShowController::class)->name('show');
+//	Route::get('{message}/edit', \Egent\Setting\Http\Controllers\Messaging\EditController::class)->name('edit');
+//	Route::patch('{message}', \Egent\Setting\Http\Controllers\Messaging\UpdateController::class)->name('update');
+//	Route::get('{message}/delete', \Egent\Setting\Http\Controllers\Messaging\DeleteController::class)->name('delete');
+//	Route::delete('{message}', \Egent\Setting\Http\Controllers\Messaging\DestroyController::class)->name('destroy');
 });
 
 Route::group([

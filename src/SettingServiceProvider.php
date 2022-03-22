@@ -13,6 +13,8 @@ use Egent\Notification\Components\Reply;
 use Egent\Notification\Console\Commands\InstallCommand;
 use Egent\Notification\Listeners\SendNotification;
 use Egent\Notification\Observers\MessageObserver;
+use Egent\Setting\Components\MessageResponder;
+use Egent\Setting\Components\MessageSignature;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -34,20 +36,10 @@ class SettingServiceProvider extends ServiceProvider
     {
 	    $this->bootRoutes();
 	    $this->loadViewsFrom(__DIR__ . '/Views', 'setting');
-
-	    return;
-        /*
-        Event::listen('*', function ($eventName, array $data) {
-            //
-            echo $eventName.'<---'.PHP_EOL;
-        });
-        */
-        // ... other things
-        $this->bootComponents();
-        $this->commands([
-            InstallCommand::class,
-        ]);
-        $this->bootComponents();
+	    $this->bootComponents();
+	    $this->commands([
+		    InstallCommand::class,
+	    ]);
         $this->bootEvents();
 		$this->bootObservers();
     }
@@ -96,20 +88,15 @@ class SettingServiceProvider extends ServiceProvider
 	 * Bring our observers online.
 	 */
 	private function bootObservers() : void {
-		\Egent\Notification\Models\Message::observe(MessageObserver::class);
 	}
 
     /**
      * Boot all components.
      */
     private function bootComponents() : void {
-        $this->loadViewComponentsAs('user-notification', [
-            Create::class,
-            Components\Loop::class,
-            Navigation::class,
-            Message::class,
-            Reply::class,
-	        FolderCreate::class
+        $this->loadViewComponentsAs('setting', [
+	        MessageResponder::class,
+			MessageSignature::class
         ]);
     }
 

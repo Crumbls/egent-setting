@@ -2,6 +2,8 @@
 
 namespace Egent\Setting\Http\Controllers\Messaging;
 
+use App\Models\User;
+use App\Models\UserResponder;
 use Egent\Setting\Http\Controllers\Controller;
 
 use App\Models\CtmCredentials;
@@ -29,196 +31,136 @@ class UpdateController extends Controller
 	    abort_if(!$user, 403);
 
 	    $validator = Validator::make($request->all(), [
-		    'extended' => [
-			    'required',
-			    'array'
-		    ],
-		    'extended.listing_active' => [
-			    'sometimes',
-			    'numeric',
-			    'min:0',
-			    'max:100'
-		    ],
-		    'extended.client_new' => [
-			    'sometimes',
-			    'numeric',
-			    'min:0',
-			    'max:100'
-		    ],
-		    'extended.under_contract' => [
-			    'sometimes',
-			    'numeric',
-			    'min:0',
-			    'max:100'
-		    ],
-		    'extended.listing_closed' => [
-			    'sometimes',
-			    'numeric',
-			    'min:0',
-			    'max:100'
-		    ],
-		    'extended.ctm_skip' => [
-			    'sometimes',
-			    'boolean'
-		    ],
-		    'notification_deadline' => [
-			    'sometimes',
-			    'numeric',
-			    'in:0,1'
-		    ],
-		    'notification_contract_created' => [
-			    'sometimes',
-			    'numeric',
-			    'in:0,1'
-		    ],
-		    'notification_contract_signed' => [
-			    'sometimes',
-			    'numeric',
-			    'in:0,1'
-		    ],
-		    'notification_contract_sent' => [
-			    'sometimes',
-			    'numeric',
-			    'in:0,1'
-		    ],
-		    'notification_comment_created' => [
-			    'sometimes',
-			    'numeric',
-			    'in:0,1'
-		    ],
-		    'notification_contract_signed_fully' => [
-			    'sometimes',
-			    'numeric',
-			    'in:0,1'
-		    ],
-		    'notification_property_status_changed' => [
-			    'sometimes',
-			    'numeric',
-			    'in:0,1'
-		    ],
-		    'notification_upcoming_events_tasks' => [
-			    'sometimes',
-			    'numeric',
-			    'in:0,1'
-		    ],
-		    'ctm' => [
+		    'responder' => [
 			    'sometimes',
 			    'array'
 		    ],
-		    'ctm.username' => [
+		    'responder.enabled' => [
+			    'sometimes',
+			    'in:0,1'
+		    ],
+		    'responder.start_at' => [
+			    'sometimes',
+			    'nullable',
+			    'date'
+		    ],
+		    'responder.end_at' => [
+			    'sometimes',
+			    'nullable',
+			    'date'
+		    ],
+		    'responder.subject' => [
 			    'sometimes',
 			    'nullable',
 			    'string',
 			    'min:1',
 			    'max:256'
 		    ],
-		    'ctm.password' => [
-			    'sometimes',
-			    'nullable',
-			    'string',
-			    'min:1',
-			    'max:256'
+		    'userresponder-trixFields' => [
+				'sometimes',
+			    'array',
 		    ],
-		    'signature_changed' => [
+		    'userresponder-trixFields.content' => [
 			    'sometimes',
-			    'numeric',
-			    'in:0,1'
+			    'nullable'
 		    ],
-		    'signature' => [
+		    'attachment-userresponder-trixFields' => [
 			    'sometimes',
-			    'nullable',
-			    'required_if:signature_changed,1',
-			    'base64image'
-		    ]
+			    'array'
+		    ],
 	    ]);
 
-	    /**
-	     * TODO: Add in remaining rules.
-	     */
 
 	    $validator->validate();
 	    $data = $validator->validated();
 
-	    // TODO: Move this to the model.  This data is very sensitive and needs to be protected.
-	    if (array_key_exists('signature_changed', $data) && $data['signature_changed']) {
-		    if (true) {
-			    $signature = new UserSignature();
-			    $valid = $signature->set($data['signature']);
-			    if ($valid) {
-				    $signature->user()->associate($user);
-				    $signature->save();
-			    } else {
-				    // TODO: Add in validation exception.
-			    }
-		    }
-	    }
-	    unset($data['signature']);
-	    unset($data['signature_changed']);
+	    /**
+	     * Convert attachment fields.
+	     */
+		$temp = preg_grep('#^attachment\-(.*?)\-trixFields$#', array_keys($data));
+		foreach($temp as $k) {
+			$data[$k] = array_filter(array_map(function($e) {
+				try {
+					$e = json_decode($e,true);
+					if (!$e) {
+						return false;
+					}
+				} catch (\Throwable $e) {
+					$e = false;
+				}
+				return $e;
+			}, $data[$k]));
 
-	    $temp = array_merge((array)$user->extended, $data['extended']);
+			$data[$k] = call_user_func_array('array_merge', array_values($data[$k]));
+			$data[$k] = array_unique($data[$k]);
+			$data[$k] = array_filter(array_map(function($file) {
+				$file = storage_path('app/public/' . $file);
+				if (!file_exists($file)) {
+					return null;
+				}
+				try {
+					$mimeType = mime_content_type($file);
+					if (preg_match('#^image\/#', $mimeType)) {
+						return $file;
+					} else if ($mimeType == 'application/pdf') {
+						return $file;
+					}
+					return null;
+				} catch (\Throwable $e) {
+					return null;
+				}
+				return $file;
+			}, $data[$k]));
 
-	    if (array_key_exists('ctm_skip', $data['extended'])) {
-		    if ($data['extended']['ctm_skip'] && $data['extended']['ctm_skip']) {
-			    unset($data['ctm']);
-			    $temp['ctm_skip'] = 1;
-		    } else {
-			    unset($temp['ctm_skip']);
-		    }
-	    } else {
-		    unset($temp['ctm_skip']);
-	    }
+		}
 
 	    /**
-	     * This is an ugly way to patch data into extended.
+	     * Process responder.
 	     */
-	    $ext = array_diff_key($data, $user->getColumnNames());
-	    unset($ext['extended']);
-	    $temp = array_merge($temp, $ext);
-	    foreach($ext as $k => $ign) {
-		    unset($data[$k]);
+		if (!array_key_exists('responder', $data) || !is_array($data['responder'])) {
+			$data['responder'] = [];
+		}
+	    if (array_key_exists('userresponder-trixFields', $data) && is_array($data['userresponder-trixFields'])) {
+			$data['responder']['body'] = implode(PHP_EOL, $data['userresponder-trixFields']);
 	    }
+		$data['responder']['enabled'] = array_key_exists('enabled', $data['responder']) ? (bool)$data['responder']['enabled'] : false;
+		unset($data['userresponder-trixFields']);
+		if (array_key_exists('attachment-userresponder-trixFields', $data)) {
+			$data['responder']['attachments'] = $data['attachment-userresponder-trixFields'];
+		}
+		unset($data['attachment-userresponder-trixFields']);
 
-	    $user->extended = $temp;
+		if (count(array_keys($data)) > 1) {
+			// Add in remaining content.
+			echo __METHOD__;
+			dd($data);
+		}
 
-	    unset($data['signature_changed']);
-	    unset($data['extended']);
-
-	    if (array_key_exists('ctm', $data)
-		    && array_key_exists('username', $data['ctm'])
-		    && array_key_exists('password', $data['ctm'])
-		    && $data['ctm']['username']
-		    && $data['ctm']['password']
-	    ) {
-		    if ($credentials = $user->ctmCredentials) {
-			    $credentials->username = $data['ctm']['username'];
-			    $credentials->password = $data['ctm']['password'];
-			    $credentials->save();
-//                Slack::getSlack()->to('#notifications')->send(sprintf('%s just updated their CTM credentials.', $user->email));
-		    } else {
-			    $credentials = new CtmCredentials();
-			    $credentials->username = $data['ctm']['username'];
-			    $credentials->password = $data['ctm']['password'];
-			    $user->ctmCredentials()->save($credentials);
-//                Slack::getSlack()->to('#notifications')->send(sprintf('%s just added their CTM credentials.', $user->email));
-		    }
-	    } else if ($user->ctmCredentials) {
-		    $user->ctmCredentials()->delete();
-//            Slack::getSlack()->to('#notifications')->send(sprintf('%s just removed their CTM credentials.', $user->email));
-	    }
-
-	    unset($data['ctm']);
-
-
-
-	    foreach ($data as $k => $v) {
-		    $user->$k = $v;
-	    }
-
-	    $user->save();
+	    $this->handleResponder($user, $data['responder']);
+	    //$this->handleResponder($data['responder']);
 
 	    flash('Settings saved.', 'success');
 
 	    return redirect()->back();
     }
 
+	protected function handleResponder(User $user, array $input) : UserResponder {
+		$trixText = null;
+		if (!$entity = $user->automaticResponder) {
+			$entity = $user->automaticResponder()->create();
+			$trixText = $entity->trixRichText()->create([
+				'field' => 'body'
+			]);
+		}
+		unset($input['attachments']);
+		$trixText = $entity->trixRichText->first();
+		$trixText->content = $input['body'];
+		$trixText->saveQuietly();
+		unset($input['body']);
+		foreach($input as $k => $v) {
+			$entity->$k = $v;
+		}
+		$entity->save();
+		return $entity;
+	}
 }

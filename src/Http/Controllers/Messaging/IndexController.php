@@ -17,7 +17,6 @@ class IndexController extends Controller
 	    $user = \Auth::user();
 	    abort_if(!$user, 403);
 
-	    flash('This feature is coming soon.', 'success');
-		return redirect()->back();
+		return view('setting::messaging', ['user' => $user]);
     }
 }
