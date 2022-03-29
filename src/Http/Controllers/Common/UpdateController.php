@@ -17,7 +17,8 @@ class UpdateController extends Controller
 {
 
     /**
-     * Store a newly created resource in storage.
+     * Save our resource.
+     * TODO: I'd like to move this so it supports multiple types easily.
      *
      * @param  \Illuminate\Http\Request $request
      *
@@ -27,10 +28,10 @@ class UpdateController extends Controller
     {
 	    $user = \Auth::user();
 	    abort_if(!$user, 403);
-print_r($request->all());exit;
+
 	    $validator = Validator::make($request->all(), [
 		    'extended' => [
-			    'required',
+			    'sometimes',
 			    'array'
 		    ],
 		    'extended.listing_active' => [
@@ -154,6 +155,10 @@ print_r($request->all());exit;
 	    }
 	    unset($data['signature']);
 	    unset($data['signature_changed']);
+
+		if (!array_key_exists('extended', $data)) {
+			$data['extended'] = [];
+		}
 
 	    $temp = array_merge((array)$user->extended, $data['extended']);
 

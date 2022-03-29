@@ -35,7 +35,6 @@ class MessageResponder extends Component
 
 	    $user = $this->user;
 
-
 	    return view('setting::component.message.responder', [
 		    'user' => $user,
 		    'entity' => $user->automaticResponder,

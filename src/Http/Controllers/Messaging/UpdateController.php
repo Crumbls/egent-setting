@@ -3,6 +3,7 @@
 namespace Egent\Setting\Http\Controllers\Messaging;
 
 use App\Models\User;
+use App\Models\UserEmailSignature;
 use App\Models\UserResponder;
 use Egent\Setting\Http\Controllers\Controller;
 
@@ -31,6 +32,30 @@ class UpdateController extends Controller
 	    abort_if(!$user, 403);
 
 	    $validator = Validator::make($request->all(), [
+			'signature' => [
+				'sometimes',
+				'array'
+			],
+		    'signature.enabled' => [
+			    'sometimes',
+			    'in:0,1'
+		    ],
+		    'signature.attach_contract' => [
+			    'sometimes',
+			    'in:0,1'
+		    ],
+		    'useremailsignature-trixFields' => [
+			    'sometimes',
+			    'array',
+		    ],
+		    'useremailsignature-trixFields.content' => [
+			    'sometimes',
+			    'nullable'
+		    ],
+		    'attachment-useremailsignature-trixFields' => [
+			    'sometimes',
+			    'array'
+		    ],
 		    'responder' => [
 			    'sometimes',
 			    'array'
@@ -117,32 +142,64 @@ class UpdateController extends Controller
 	    /**
 	     * Process responder.
 	     */
-		if (!array_key_exists('responder', $data) || !is_array($data['responder'])) {
-			$data['responder'] = [];
-		}
-	    if (array_key_exists('userresponder-trixFields', $data) && is_array($data['userresponder-trixFields'])) {
-			$data['responder']['body'] = implode(PHP_EOL, $data['userresponder-trixFields']);
+	    if (!array_key_exists('responder', $data) || !is_array($data['responder'])) {
+		    $data['responder'] = [];
 	    }
-		$data['responder']['enabled'] = array_key_exists('enabled', $data['responder']) ? (bool)$data['responder']['enabled'] : false;
-		unset($data['userresponder-trixFields']);
-		if (array_key_exists('attachment-userresponder-trixFields', $data)) {
-			$data['responder']['attachments'] = $data['attachment-userresponder-trixFields'];
-		}
-		unset($data['attachment-userresponder-trixFields']);
-
-		if (count(array_keys($data)) > 1) {
-			// Add in remaining content.
-			echo __METHOD__;
-			dd($data);
-		}
+	    if (array_key_exists('userresponder-trixFields', $data) && is_array($data['userresponder-trixFields'])) {
+		    $data['responder']['body'] = implode(PHP_EOL, $data['userresponder-trixFields']);
+	    }
+	    $data['responder']['enabled'] = array_key_exists('enabled', $data['responder']) ? (bool)$data['responder']['enabled'] : false;
+	    unset($data['userresponder-trixFields']);
+	    if (array_key_exists('attachment-userresponder-trixFields', $data)) {
+		    $data['responder']['attachments'] = $data['attachment-userresponder-trixFields'];
+	    }
+	    unset($data['attachment-userresponder-trixFields']);
 
 	    $this->handleResponder($user, $data['responder']);
+
+	    /**
+	     * Process signature.
+	     */
+	    if (!array_key_exists('signature', $data) || !is_array($data['signature'])) {
+		    $data['signature'] = [];
+	    }
+	    if (array_key_exists('useremailsignature-trixFields', $data) && is_array($data['useremailsignature-trixFields'])) {
+		    $data['signature']['body'] = implode(PHP_EOL, $data['useremailsignature-trixFields']);
+	    }
+	    $data['signature']['enabled'] = array_key_exists('enabled', $data['signature']) ? (bool)$data['signature']['enabled'] : false;
+	    unset($data['useremailsignature-trixFields']);
+	    if (array_key_exists('attachment-useremailsignature-trixFields', $data)) {
+		    $data['signature']['attachments'] = $data['attachment-useremailsignature-trixFields'];
+	    }
+	    unset($data['attachment-useremailsignature-trixFields']);
+
+	    $this->handleSignature($user, $data['signature']);
 	    //$this->handleResponder($data['responder']);
 
 	    flash('Settings saved.', 'success');
 
 	    return redirect()->back();
     }
+
+	protected function handleSignature(User $user, array $input) : UserEmailSignature {
+		$trixText = null;
+		unset($input['attachments']);
+		$trixText = null;
+
+		$entity = $user->emailSignature->firstOrCreate();
+		if ($entity->wasRecentlyCreated) {
+			$entity->save();
+		}
+		$trixText = $entity->trixRichText()->firstOrCreate(['field' => 'body']);
+		$trixText->content = $input['body'];
+		$trixText->saveQuietly();
+		unset($input['body']);
+		foreach($input as $k => $v) {
+			$entity->$k = $v;
+		}
+		$entity->save();
+		return $entity;
+	}
 
 	protected function handleResponder(User $user, array $input) : UserResponder {
 		$trixText = null;

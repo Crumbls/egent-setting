@@ -17,7 +17,7 @@
         </div>
 
         @action('content', 'settings', $user)
-
+<div class="container mx-auto">
         <div class="md:flex md:space-x-6">
             <div class="w-full md:w-1/2">
                 <x-setting-message-signature :user="$user" />
@@ -26,6 +26,6 @@
                 <x-setting-message-responder :user="$user" />
             </div>
         </div>
-
+</div>
     </form>
 </x-app-layout>

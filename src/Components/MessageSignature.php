@@ -3,6 +3,8 @@ namespace Egent\Setting\Components;
 
 
 use App\Models\User;
+use App\Models\UserEmailSignature;
+use App\Models\UserResponder;
 use Egent\Egent\Core\Models\Task;
 use Egent\Notification\Models\Thread;
 use Spatie\Tags\Tag;
@@ -35,7 +37,9 @@ class MessageSignature extends Component
         $user = $this->user;
 
         return view('setting::component.message.signature', [
-            'user' => $user
-        ]);
+            'user' => $user,
+		    'entity' => $user->emailSignature,
+		    'model' => UserEmailSignature::class
+	    ]);
     }
 }
