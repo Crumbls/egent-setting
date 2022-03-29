@@ -4,6 +4,7 @@ namespace Egent\Setting;
 
 
 use App\Models\User;
+use Egent\Contract\Document;
 use Egent\Notification\Components\Create;
 use Egent\Notification\Components\FolderCreate;
 use Egent\Notification\Components\Message;
@@ -15,8 +16,11 @@ use Egent\Notification\Listeners\SendNotification;
 use Egent\Notification\Observers\MessageObserver;
 use Egent\Setting\Components\MessageResponder;
 use Egent\Setting\Components\MessageSignature;
+use Egent\Setting\Events\GoogleConnected;
 use Egent\Setting\Policies\SettingPolicy;
+use Egent\Task\Facades\CalendarFacade;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -31,8 +35,19 @@ class SettingServiceProvider extends ServiceProvider
      * @var array
      */
     protected $events = [
+		\Egent\Setting\Events\GoogleConnected::class => [
+			\Egent\Setting\Listeners\GoogleConnected::class
+		]
     ];
-
+	/**
+	 * Get the services provided by the provider.
+	 *
+	 * @return array
+	 */
+	public function provides(): array
+	{
+		return ['setting'];
+	}
 
     public function boot()
     {
@@ -45,6 +60,7 @@ class SettingServiceProvider extends ServiceProvider
 	    ]);
         $this->bootEvents();
 		$this->bootObservers();
+
     }
 
     protected function bootRoutes() : void {
@@ -128,5 +144,11 @@ class SettingServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(__DIR__ . '/Config/config.php', 'setting');
+
+	    $loader = AliasLoader::getInstance();
+	    $loader->alias('setting', Setting::class);
+	    $this->app->bind('setting',function() {
+		    return new Setting($this->app);
+	    });
     }
 }

@@ -10,19 +10,20 @@ class SettingPolicy
 {
     use HandlesAuthorization;
 
+	public function calendar() : bool {
+		return true;
+	}
 
 	/**
 	 * Determine whether the user has CTM account settings.
 	 *
-	 * @deprecated
 	 * @param  App\Models\User  $user
 	 * @param  Egent\Office\Models\Office  $model
 	 * @return mixed
 	 */
-	public function ctm(User $user = null)
+	public function ctm(User $user = null) : bool
 	{
-		echo __METHOD__;
-		return false;
+		return true;
 		if ($user->can('create', Office::class)) {
 			return true;
 		}
@@ -30,8 +31,28 @@ class SettingPolicy
 		return false;
 	}
 
-	public function messaging() : bool {
+	public function goalMonthly() : bool {
 		return true;
+	}
+
+	public function messaging() : bool {
+		return false;
+	}
+	public function notification() : bool {
+		return true;
+	}
+	public function template() : bool {
+		return false;
+	}
+
+	/**
+	 * Can the user link to a transaction coordinator.
+	 * @param User $user
+	 * @return bool
+	 */
+	public function transactionCoordinator(User $user) : bool {
+		$roles = $user->roles->pluck('name');
+		return $roles->contains('agent') || $roles->contains('broker');
 	}
 
 	public function __call($method, $args)

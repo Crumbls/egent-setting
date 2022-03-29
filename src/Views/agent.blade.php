@@ -23,10 +23,10 @@
         @can('setting-notification')
         <x-setting.notifications :user="$user" />
         @endcan
-        @can('setting-goal-monthly')
+        @can('setting-signature')
         <x-setting.signature :user="$user" />
         @endcan
-        @can('setting-goal-monthly')
+        @can('setting-ctm')
         <x-setting.ctm :user="$user" />
         @endcan
         @can('setting-messaging')

@@ -2,7 +2,7 @@
 
 ---
 
-Settings package for users using eGEnt.
+Settings package for users using eGent.
 
 ---
 

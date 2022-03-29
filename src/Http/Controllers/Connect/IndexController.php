@@ -22,9 +22,9 @@ class IndexController extends Controller
 		    ->sortByDesc('level')
 		    ->pluck('name')
 		    ->map(function ($e) {
-			    return 'app.settings.' . $e;
+			    return 'setting::connect.' . $e;
 		    });
-	    $views->push('app.settings.index');
+	    $views->push('setting::connect');
 
 	    $data = [
 		    'user' => $user,
