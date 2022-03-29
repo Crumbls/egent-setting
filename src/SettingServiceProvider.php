@@ -15,7 +15,9 @@ use Egent\Notification\Listeners\SendNotification;
 use Egent\Notification\Observers\MessageObserver;
 use Egent\Setting\Components\MessageResponder;
 use Egent\Setting\Components\MessageSignature;
+use Egent\Setting\Policies\SettingPolicy;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use TorMorten\Eventy\Facades\Events as Eventy;
@@ -37,6 +39,7 @@ class SettingServiceProvider extends ServiceProvider
 	    $this->bootRoutes();
 	    $this->loadViewsFrom(__DIR__ . '/Views', 'setting');
 	    $this->bootComponents();
+		$this->bootPolicy();
 	    $this->commands([
 		    InstallCommand::class,
 	    ]);
@@ -69,7 +72,17 @@ class SettingServiceProvider extends ServiceProvider
         return false;
     }
 
-    /**
+	/**
+	 * Boot all components.
+	 */
+	private function bootComponents() : void {
+		$this->loadViewComponentsAs('setting', [
+			MessageResponder::class,
+			MessageSignature::class
+		]);
+	}
+
+	/**
      * Register the Inbox events.
      *
      * @return void
@@ -90,15 +103,27 @@ class SettingServiceProvider extends ServiceProvider
 	private function bootObservers() : void {
 	}
 
-    /**
-     * Boot all components.
-     */
-    private function bootComponents() : void {
-        $this->loadViewComponentsAs('setting', [
-	        MessageResponder::class,
-			MessageSignature::class
-        ]);
-    }
+
+	/**
+	 * Bring our policies online.
+	 */
+	protected function bootPolicy() : void {
+		Gate::define('setting-ctm', [SettingPolicy::class, 'ctm']);
+		Gate::define('setting-messaging', [SettingPolicy::class, 'messaging']);
+		Gate::define('setting-goal-monthly', [SettingPolicy::class, 'goalMonthly']);
+        Gate::define('setting-notification', [SettingPolicy::class, 'notification']);
+        Gate::define('setting-goal-monthly', [SettingPolicy::class, 'goalMonthly']);
+        Gate::define('setting-messaging', [SettingPolicy::class, 'messaging']);
+        Gate::define('setting-template', [SettingPolicy::class, 'template']);
+        Gate::define('setting-calendar', [SettingPolicy::class, 'calendar']);
+        Gate::define('setting-transaction-coordinator', [SettingPolicy::class, 'transactionCoordinator']);
+		
+//		Gate::define('transaction-policy', [TransactionPolicy::class, 'show']);
+///		Gate::policy('transaction-policy', function($user) { return true; });//[TransactionPolicy::class, 'view']);
+		if ($temp = \Config::get('listing.policy')) {
+		//	Gate::policy(Listing::class, $temp);
+		}
+	}
 
     public function register()
     {
