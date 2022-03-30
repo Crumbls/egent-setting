@@ -25,9 +25,5 @@ class MessagingController extends Controller
 
 		return redirect()->back();
 
-        return view('app.settings.index',
-            [
-                'user' => \Auth::user()
-            ]);
     }
 }

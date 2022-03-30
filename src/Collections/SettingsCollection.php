@@ -368,4 +368,41 @@ class SettingsCollection extends Collection
 
         return $this->__dynamicget($key);
     }
+
+	/**
+	 * Set an array item to a given value using "dot" notation.
+	 *
+	 * If no key is given to the method, the entire array will be replaced.
+	 *
+	 * @param array  $array
+	 * @param string $key
+	 * @param mixed  $value
+	 *
+	 * @return array
+	 */
+	public function dotString(string $key) : string
+	{
+		return implode('.', array_filter(preg_split('/[\[|\]]/', $key)));
+	}
+
+	/**
+	 * Get an item from the collection by key.
+	 *
+	 * @param  mixed  $key
+	 * @param  mixed  $default
+	 * @return mixed
+	 */
+	public function get($key, $default = null)
+	{
+		if (array_key_exists($key, $this->items)) {
+			return $this->items[$key];
+		}
+		// Convert to a dot syntax to see if it exists.  This is the normal format.
+		$temp = $this->dotString($key);
+		if (array_key_exists($temp, $this->items)) {
+			return $this->items[$temp];
+		}
+
+		return value($default);
+	}
 }

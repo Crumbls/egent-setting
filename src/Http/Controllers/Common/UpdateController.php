@@ -7,6 +7,8 @@ use Egent\Setting\Http\Controllers\Controller;
 use App\Models\CtmCredentials;
 use App\Models\UserSignature;
 use Egent\Setting\Events\Message\Created;
+use Egent\Setting\Models\Metadata;
+use Egent\Setting\Models\Setting;
 use Egent\Setting\Rules\Recipients;
 use Illuminate\Http\Request;
 use Egent\Setting\Models\Thread;
@@ -16,214 +18,225 @@ use Illuminate\Support\Facades\Validator;
 class UpdateController extends Controller
 {
 
-    /**
-     * Save our resource.
-     * TODO: I'd like to move this so it supports multiple types easily.
-     *
-     * @param  \Illuminate\Http\Request $request
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function __invoke(Request $request)
-    {
-	    $user = \Auth::user();
-	    abort_if(!$user, 403);
+	private $user;
 
-	    $validator = Validator::make($request->all(), [
-		    'extended' => [
-			    'sometimes',
-			    'array'
-		    ],
-		    'extended.listing_active' => [
-			    'sometimes',
-			    'numeric',
-			    'min:0',
-			    'max:100'
-		    ],
-		    'extended.client_new' => [
-			    'sometimes',
-			    'numeric',
-			    'min:0',
-			    'max:100'
-		    ],
-		    'extended.under_contract' => [
-			    'sometimes',
-			    'numeric',
-			    'min:0',
-			    'max:100'
-		    ],
-		    'extended.listing_closed' => [
-			    'sometimes',
-			    'numeric',
-			    'min:0',
-			    'max:100'
-		    ],
-		    'extended.ctm_skip' => [
-			    'sometimes',
-			    'boolean'
-		    ],
-		    'notification_deadline' => [
-			    'sometimes',
-			    'numeric',
-			    'in:0,1'
-		    ],
-		    'notification_contract_created' => [
-			    'sometimes',
-			    'numeric',
-			    'in:0,1'
-		    ],
-		    'notification_contract_signed' => [
-			    'sometimes',
-			    'numeric',
-			    'in:0,1'
-		    ],
-		    'notification_contract_sent' => [
-			    'sometimes',
-			    'numeric',
-			    'in:0,1'
-		    ],
-		    'notification_comment_created' => [
-			    'sometimes',
-			    'numeric',
-			    'in:0,1'
-		    ],
-		    'notification_contract_signed_fully' => [
-			    'sometimes',
-			    'numeric',
-			    'in:0,1'
-		    ],
-		    'notification_property_status_changed' => [
-			    'sometimes',
-			    'numeric',
-			    'in:0,1'
-		    ],
-		    'notification_upcoming_events_tasks' => [
-			    'sometimes',
-			    'numeric',
-			    'in:0,1'
-		    ],
-		    'ctm' => [
-			    'sometimes',
-			    'array'
-		    ],
-		    'ctm.username' => [
-			    'sometimes',
-			    'nullable',
-			    'string',
-			    'min:1',
-			    'max:256'
-		    ],
-		    'ctm.password' => [
-			    'sometimes',
-			    'nullable',
-			    'string',
-			    'min:1',
-			    'max:256'
-		    ],
-		    'signature_changed' => [
-			    'sometimes',
-			    'numeric',
-			    'in:0,1'
-		    ],
-		    'signature' => [
-			    'sometimes',
-			    'nullable',
-			    'required_if:signature_changed,1',
-			    'base64image'
-		    ]
-	    ]);
+	private $rules;
 
-	    /**
-	     * TODO: Add in remaining rules.
-	     */
+	/**
+	 * Save our resource.
+	 * TODO: I'd like to move this so it supports multiple types easily.
+	 *
+	 * @param \Illuminate\Http\Request $request
+	 *
+	 * @return \Illuminate\Http\Response
+	 */
+	public function __invoke(Request $request)
+	{
+		$user = \Auth::user();
+		abort_if(!$user, 403);
 
-	    $validator->validate();
-	    $data = $validator->validated();
+		$input = $request->all();
 
-	    // TODO: Move this to the model.  This data is very sensitive and needs to be protected.
-	    if (array_key_exists('signature_changed', $data) && $data['signature_changed']) {
-		    if (true) {
-			    $signature = new UserSignature();
-			    $valid = $signature->set($data['signature']);
-			    if ($valid) {
-				    $signature->user()->associate($user);
-				    $signature->save();
-			    } else {
-				    // TODO: Add in validation exception.
-			    }
-		    }
-	    }
-	    unset($data['signature']);
-	    unset($data['signature_changed']);
+		$rules = array_map(function ($e) {
+			return [
+				'sometimes',
+				'nullable',
+				$e->type
+			];
+		}, $this->getRules());
+
+		$rules['ctm'] = ['sometimes','array'];
+		$rules['ctm.username'] = ['sometimes','nullable','string', 'max:256', 'min:3'];
+		$rules['ctm.password'] = ['sometimes','nullable','string', 'max:256', 'min:3'];
+
+		$rules['signature_changed'] = [
+			'sometimes',
+			'numeric',
+			'in:0,1'
+		];
+		$rules['signature'] = [
+			'sometimes',
+			'nullable',
+			'required_if:signature_changed,1',
+			'base64image'
+		];
+		/*
+				echo 'this is being rewritten to support a dot notation syntax.  Check back tonight.';
+		dd($request->all());
+				$validator = Validator::make($request->all(), [
+					'extended' => [
+						'sometimes',
+						'array'
+					],
+					'extended.listing_active' => [
+						'sometimes',
+						'numeric',
+						'min:0',
+						'max:100'
+					],
+					'extended.client_new' => [
+						'sometimes',
+						'numeric',
+						'min:0',
+						'max:100'
+					],
+					'extended.under_contract' => [
+						'sometimes',
+						'numeric',
+						'min:0',
+						'max:100'
+					],
+					'extended.listing_closed' => [
+						'sometimes',
+						'numeric',
+						'min:0',
+						'max:100'
+					],
+					'extended.ctm_skip' => [
+						'sometimes',
+						'boolean'
+					],
+					'notification_deadline' => [
+						'sometimes',
+						'numeric',
+						'in:0,1'
+					],
+					'notification_contract_created' => [
+						'sometimes',
+						'numeric',
+						'in:0,1'
+					],
+					'notification_contract_signed' => [
+						'sometimes',
+						'numeric',
+						'in:0,1'
+					],
+					'notification_contract_sent' => [
+						'sometimes',
+						'numeric',
+						'in:0,1'
+					],
+					'notification_comment_created' => [
+						'sometimes',
+						'numeric',
+						'in:0,1'
+					],
+					'notification_contract_signed_fully' => [
+						'sometimes',
+						'numeric',
+						'in:0,1'
+					],
+					'notification_property_status_changed' => [
+						'sometimes',
+						'numeric',
+						'in:0,1'
+					],
+					'notification_upcoming_events_tasks' => [
+						'sometimes',
+						'numeric',
+						'in:0,1'
+					],
+					'signature_changed' => [
+						'sometimes',
+						'numeric',
+						'in:0,1'
+					],
+					'signature' => [
+						'sometimes',
+						'nullable',
+						'required_if:signature_changed,1',
+						'base64image'
+					]
+				]);
+		*/
+
+		$validator = Validator::make($input, $rules);
+
+		$validator->validate();
+		$data = $validator->validated();
+
+		// TODO: Move this to the model.  This data is very sensitive and needs to be protected.
+		if (array_key_exists('signature_changed', $data) && $data['signature_changed']) {
+			if (true) {
+				$signature = new UserSignature();
+				$valid = $signature->set($data['signature']);
+				if ($valid) {
+					$signature->user()->associate($user);
+					$signature->save();
+				} else {
+					// TODO: Add in validation exception.
+				}
+			}
+		}
+		unset($data['signature']);
+		unset($data['signature_changed']);
 
 		if (!array_key_exists('extended', $data)) {
 			$data['extended'] = [];
 		}
 
-	    $temp = array_merge((array)$user->extended, $data['extended']);
+		$this->user = $user;
 
-	    if (array_key_exists('ctm_skip', $data['extended'])) {
-		    if ($data['extended']['ctm_skip'] && $data['extended']['ctm_skip']) {
-			    unset($data['ctm']);
-			    $temp['ctm_skip'] = 1;
-		    } else {
-			    unset($temp['ctm_skip']);
-		    }
-	    } else {
-		    unset($temp['ctm_skip']);
-	    }
+		// Handle ctm credentials, if necessary.
+		if (array_key_exists('ctm', $data)) {
+			$data['ctm'] = array_filter($data['ctm']);
+			if (array_key_exists('username', $data['ctm']) && !array_key_exists('password', $data['ctm'])) {
+				// Do not change.
+			} else if (count($data['ctm']) != 2) {
+				if ($temp = $user->ctmCredentials) {
+					$temp->delete();
+				}
+			} else {
+				$temp = $user->ctmCredentials ? $user->ctmCredentials : $user->ctmCredentials()->create($data['ctm']);
+				if (!$temp->wasRecentlyCreated) {
+					foreach($data['ctm'] as $k => $v) {
+						$temp->$k = $v;
+					}
+					$temp->save();
+				}
+			}
+			unset($data['ctm']);
+		}
 
-	    /**
-	     * This is an ugly way to patch data into extended.
-	     */
-	    $ext = array_diff_key($data, $user->getColumnNames());
-	    unset($ext['extended']);
-	    $temp = array_merge($temp, $ext);
-	    foreach($ext as $k => $ign) {
-		    unset($data[$k]);
-	    }
+		// Remove extended.
+		unset($data['extended']);
 
-	    $user->extended = $temp;
+		// Convert to dot syntax for saving.
+		$data = \Arr::dot($data);
+		array_walk_recursive($data, [$this, 'save']);
 
-	    unset($data['signature_changed']);
-	    unset($data['extended']);
+		flash('Settings saved.', 'success');
 
-	    if (array_key_exists('ctm', $data)
-		    && array_key_exists('username', $data['ctm'])
-		    && array_key_exists('password', $data['ctm'])
-		    && $data['ctm']['username']
-		    && $data['ctm']['password']
-	    ) {
-		    if ($credentials = $user->ctmCredentials) {
-			    $credentials->username = $data['ctm']['username'];
-			    $credentials->password = $data['ctm']['password'];
-			    $credentials->save();
-//                Slack::getSlack()->to('#notifications')->send(sprintf('%s just updated their CTM credentials.', $user->email));
-		    } else {
-			    $credentials = new CtmCredentials();
-			    $credentials->username = $data['ctm']['username'];
-			    $credentials->password = $data['ctm']['password'];
-			    $user->ctmCredentials()->save($credentials);
-//                Slack::getSlack()->to('#notifications')->send(sprintf('%s just added their CTM credentials.', $user->email));
-		    }
-	    } else if ($user->ctmCredentials) {
-		    $user->ctmCredentials()->delete();
-//            Slack::getSlack()->to('#notifications')->send(sprintf('%s just removed their CTM credentials.', $user->email));
-	    }
+		return redirect()->back();
+	}
 
-	    unset($data['ctm']);
+	protected function getRules(): array
+	{
+		if ($this->rules) {
+			return $this->rules;
+		}
+		$temp = with(new Metadata);
+		$table = $temp->getTable();
+		$connection = $temp->getConnection();
+		$this->rules = $connection->table($table)->select(['id', 'name', 'type', 'is_enabled', 'default'])->get()->keyBy('name')->toArray();
+		return $this->rules;
+	}
 
-
-
-	    foreach ($data as $k => $v) {
-		    $user->$k = $v;
-	    }
-
-	    $user->save();
-
-	    flash('Settings saved.', 'success');
-
-	    return redirect()->back();
-    }
-
+	private function save($value, $key)
+	{
+		if ($temp = $this->user->settings->get($key)) {
+			if ($temp->value != $value) {
+				$temp->value = $value;
+				$temp->save();
+			}
+		} else if ($temp = $this->rules[$key]) {
+			$setting = new Setting();
+			$setting->metadata_id = $temp->id;
+			$setting->settable_type = get_class($this->user);
+			$setting->settable_id = $this->user->getKey();
+			$setting->is_enabled = $temp->is_enabled;
+			$setting->value = $value;
+			$setting->save();
+		}
+	}
 }

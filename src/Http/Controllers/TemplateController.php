@@ -21,10 +21,5 @@ class TemplateController extends Controller
 
 	    return redirect()->back();
 
-	    abort(500);
-        return view('app.settings.index',
-            [
-                'user' => \Auth::user()
-            ]);
     }
 }

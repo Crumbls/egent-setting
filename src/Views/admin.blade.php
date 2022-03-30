@@ -1,1 +1,1 @@
-@include('app.settings.agent')
+@include('setting::agent')

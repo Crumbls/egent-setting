@@ -20,7 +20,7 @@ class SettingController extends Controller
         $user = \Auth::user();
         abort_if(!$user, 403);
 
-        return view('app.settings.index',
+        return view('setting::index',
             [
                 'user' => \Auth::user()
             ]);
