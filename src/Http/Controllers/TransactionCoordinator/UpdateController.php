@@ -2,6 +2,8 @@
 
 namespace Egent\Setting\Http\Controllers\TransactionCoordinator;
 
+use Egent\Setting\Events\TransactionCoordinator\Connected;
+use Egent\Setting\Events\TransactionCoordinator\Disconnected;
 use Egent\Setting\Http\Controllers\Controller;
 
 use App\Models\CtmCredentials;
@@ -38,17 +40,29 @@ class UpdateController extends Controller
 	    ]);
 	    $data = $validator->validated();
 	    $user = \Auth::user();
+		$class = get_class($user);
+
 	    if (!array_key_exists('transactionCoordinator', $data) || !$data['transactionCoordinator']) {
 		    foreach($user->transactionCoordinators as $tc) {
 			    $user->transactionCoordinators()->detach($tc);
+
+				Disconnected::dispatch($user, $tc);
+
 			    flash('Transaction Coordinator disconnected.', 'success');
 		    }
 	    } else {
-		    $tc = User::where('uuid', $data['transactionCoordinator'])->firstOrFail();
+		    $tc = $class::where('uuid', $data['transactionCoordinator'])->firstOrFail();
 
-		    if (!$user->transactionCoordinators->pluck('uuid')->contains($data['transactionCoordinator'])) {
-			    $user->transactionCoordinators()->sync([$tc->getKey()]);
-		    }
+			$existing = $user->transactionCoordinators->keyBy('uuid');
+
+			foreach($existing->except($tc->uuid) as $dc) {
+				Disconnected::dispatch($user, $dc);
+			}
+
+			if (!$existing->has($tc->uuid)) {
+				$user->transactionCoordinators()->sync([$tc->getKey()]);
+				Connected::dispatch($user, $tc);
+			}
 
 		    flash('Transaction Coordinator connected.', 'success');
 	    }

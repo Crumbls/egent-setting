@@ -36,13 +36,21 @@ class SettingPolicy
 	}
 
 	public function messaging() : bool {
-		return false;
+		return true;
 	}
+
 	public function notification() : bool {
 		return true;
 	}
+
+	public function signature(User $user) : bool {
+		$roles = $user->roles->pluck('name');
+		return $roles->intersect(['admin','agent','broker'])->count() > 0;
+		return true;
+	}
+
 	public function template() : bool {
-		return false;
+		return true;
 	}
 
 	/**
@@ -51,8 +59,12 @@ class SettingPolicy
 	 * @return bool
 	 */
 	public function transactionCoordinator(User $user) : bool {
+
+		// TODO: REMOVE THIS.
+		return true;
+
 		$roles = $user->roles->pluck('name');
-		return $roles->contains('agent') || $roles->contains('broker');
+		return $roles->intersect(['agent','broker'])->count() > 0;
 	}
 
 	public function __call($method, $args)

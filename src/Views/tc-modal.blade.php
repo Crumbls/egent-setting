@@ -1,6 +1,5 @@
 <form method="post" action="{{ route('settings.transaction-coordinator.store') }}">
 @csrf
-
     <label for="transactionCoordinator" class="block text-center uppercase text-xl font-extrabold mb-4">Connect with Transaction Coordinator</label>
         <div class="mb-2">
 			<?php
@@ -25,7 +24,7 @@
                     data-label="name"
                     data-search-placeholder-value="@lang('Search for a Transaction Coordinator')"
             >
-                @foreach(\App\Models\User::whereIs('transaction-coordinator')->orderBy('name_first','asc')->get() as $option)
+                @foreach(\App\Models\User::whereIs('tc')->orderBy('name_first','asc')->get() as $option)
                     <option value="{{ $option->uuid }}"{{ $value && $value == $option->uuid ? ' selected' : '' }}>{{ $option->name }} &lt;{{ $option->email }}&gt;</option>
                 @endforeach
             </select>

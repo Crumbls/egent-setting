@@ -16,10 +16,8 @@ class IndexController extends Controller
     {
 	    $user = \Auth::user();
 	    abort_if(!$user, 403);
+		$this->authorize('setting-transaction-coordinator');
 
-	    return view('setting::connect-transaction-coordinator',
-		    [
-			    'user' => \Auth::user()
-		    ]);
+	    return view('setting::connect-transaction-coordinator', [ 'user' => $user ]);
     }
 }

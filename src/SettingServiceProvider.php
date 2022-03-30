@@ -35,9 +35,15 @@ class SettingServiceProvider extends ServiceProvider
      * @var array
      */
     protected $events = [
-		\Egent\Setting\Events\GoogleConnected::class => [
-			\Egent\Setting\Listeners\GoogleConnected::class
-		]
+	    \Egent\Setting\Events\GoogleConnected::class => [
+		    \Egent\Setting\Listeners\GoogleConnected::class
+	    ],
+	    \Egent\Setting\Events\TransactionCoordinator\Connected::class => [
+		    \Egent\Setting\Listeners\TCConnected::class
+	    ],
+	    \Egent\Setting\Events\TransactionCoordinator\Disconnected::class => [
+		    \Egent\Setting\Listeners\TCDisconnected::class
+	    ],
     ];
 	/**
 	 * Get the services provided by the provider.
@@ -129,7 +135,8 @@ class SettingServiceProvider extends ServiceProvider
 		Gate::define('setting-goal-monthly', [SettingPolicy::class, 'goalMonthly']);
         Gate::define('setting-notification', [SettingPolicy::class, 'notification']);
         Gate::define('setting-goal-monthly', [SettingPolicy::class, 'goalMonthly']);
-        Gate::define('setting-messaging', [SettingPolicy::class, 'messaging']);
+		Gate::define('setting-messaging', [SettingPolicy::class, 'messaging']);
+		Gate::define('setting-signature', [SettingPolicy::class, 'signature']);
         Gate::define('setting-template', [SettingPolicy::class, 'template']);
         Gate::define('setting-calendar', [SettingPolicy::class, 'calendar']);
         Gate::define('setting-transaction-coordinator', [SettingPolicy::class, 'transactionCoordinator']);
