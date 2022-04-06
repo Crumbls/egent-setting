@@ -16,6 +16,12 @@ use Egent\Notification\Listeners\SendNotification;
 use Egent\Notification\Observers\MessageObserver;
 use Egent\Setting\Components\MessageResponder;
 use Egent\Setting\Components\MessageSignature;
+use Egent\Setting\Components\TemplateClauses;
+use Egent\Setting\Components\TemplateContracts;
+use Egent\Setting\Components\TemplateDeadlineExplanations;
+use Egent\Setting\Components\TemplateDeadlines;
+use Egent\Setting\Components\TemplateMessages;
+use Egent\Setting\Components\TemplateTasks;
 use Egent\Setting\Events\GoogleConnected;
 use Egent\Setting\Policies\SettingPolicy;
 use Egent\Task\Facades\CalendarFacade;
@@ -100,7 +106,13 @@ class SettingServiceProvider extends ServiceProvider
 	private function bootComponents() : void {
 		$this->loadViewComponentsAs('setting', [
 			MessageResponder::class,
-			MessageSignature::class
+			MessageSignature::class,
+			TemplateClauses::class,
+			TemplateContracts::class,
+			TemplateDeadlineExplanations::class,
+			TemplateDeadlines::class,
+			TemplateMessages::class,
+			TemplateTasks::class
 		]);
 	}
 

@@ -36,7 +36,8 @@ Route::group([
 
 Route::group([
 	'prefix' => 'settings/templates',
-	'as' => 'settings.templates.'
+	'as' => 'settings.templates.',
+	'middleware' => ['developer']
 ], function() {
 	Route::get('/', \Egent\Setting\Http\Controllers\Template\IndexController::class)->name('index');
 	Route::get('create', \Egent\Setting\Http\Controllers\Template\CreateController::class)->name('create');
