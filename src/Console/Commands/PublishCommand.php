@@ -7,6 +7,7 @@ use Illuminate\Filesystem\Filesystem;
 
 /**
  * @internal
+ * @deprecated
  */
 class PublishCommand extends Command
 {

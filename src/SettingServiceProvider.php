@@ -4,16 +4,7 @@ namespace Egent\Setting;
 
 
 use App\Models\User;
-use Egent\Contract\Document;
-use Egent\Notification\Components\Create;
-use Egent\Notification\Components\FolderCreate;
-use Egent\Notification\Components\Message;
-use Egent\Notification\Components\Navigation;
-use Egent\Notification\Components\Notification\Loop;
-use Egent\Notification\Components\Reply;
-use Egent\Notification\Console\Commands\InstallCommand;
-use Egent\Notification\Listeners\SendNotification;
-use Egent\Notification\Observers\MessageObserver;
+
 use Egent\Setting\Components\MessageResponder;
 use Egent\Setting\Components\MessageSignature;
 use Egent\Setting\Components\TemplateClauses;
@@ -22,6 +13,7 @@ use Egent\Setting\Components\TemplateDeadlineExplanations;
 use Egent\Setting\Components\TemplateDeadlines;
 use Egent\Setting\Components\TemplateMessages;
 use Egent\Setting\Components\TemplateTasks;
+use Egent\Setting\Console\Commands\InstallCommand;
 use Egent\Setting\Events\GoogleConnected;
 use Egent\Setting\Policies\SettingPolicy;
 use Egent\Task\Facades\CalendarFacade;

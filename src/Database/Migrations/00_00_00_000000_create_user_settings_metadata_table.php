@@ -7,14 +7,21 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateUserSettingsMetadataTable extends Migration
 {
+	public function getTable() : string {
+		return with(new \Egent\Setting\Models\Metadata)->getTable();
+	}
 	/**
 	 * Run the migrations.
 	 *
 	 * @return void
 	 */
-	public function up(): void
+	public function up()
 	{
-		Schema::create('user_settings_metadata', function (Blueprint $table): void {
+		$table = $this->getTable();
+		if (Schema::hasTable($table)) {
+			return;
+		}
+		Schema::create($table, function (Blueprint $table) {
 			$table->id();
 
 			$table->string('name')->unique();
@@ -36,6 +43,6 @@ class CreateUserSettingsMetadataTable extends Migration
 	 */
 	public function down(): void
 	{
-		Schema::dropIfExists('user_settings_metadata');
+		Schema::dropIfExists($this->getTable());
 	}
 }

@@ -11,6 +11,7 @@ use Symfony\Component\Console\Input\InputInterface;
 
 /**
  * @internal
+ * @deprecated
  */
 class MigrateCommand extends Command
 {

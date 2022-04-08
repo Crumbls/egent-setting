@@ -2,6 +2,7 @@
 
 namespace Egent\Setting\Traits;
 
+use Egent\Setting\Models\MessageLibary;
 use Egent\Setting\Models\Setting;
 use Egent\Setting\Relationships\MorphManySettings;
 use Egent\Setting\Scopes\WhereConfig;
@@ -17,6 +18,13 @@ use function method_exists;
  */
 trait HasConfig
 {
+	/**
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function messageLibraries() {
+		return $this->hasMany(MessageLibary::class);
+	}
+
     /**
      * Returns the settings relationship.
      *

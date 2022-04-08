@@ -4,6 +4,11 @@
 
 Settings package for users using eGent.
 
+After adding package via composer, execute 
+```
+php artisan setting:install
+```
+
 ---
 
 ## Credits

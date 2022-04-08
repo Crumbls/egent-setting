@@ -2,6 +2,22 @@
 
 use Illuminate\Support\Facades\Route;
 
+
+Route::group([
+	'prefix' => 'settings/templates/message-libraries',
+	'as' => 'settings.templates.message-libraries.',
+//	'middleware' => ['developer']
+], function() {
+	Route::get('/', \Egent\Setting\Http\Controllers\Template\MessageLibrary\IndexController::class)->name('index');
+	Route::get('create', \Egent\Setting\Http\Controllers\Template\MessageLibrary\CreateController::class)->name('create');
+	Route::post('', \Egent\Setting\Http\Controllers\Template\MessageLibrary\StoreController::class)->name('store');
+	Route::get('{message}', \Egent\Setting\Http\Controllers\Template\MessageLibrary\ShowController::class)->name('show');
+	Route::get('{message}/edit', \Egent\Setting\Http\Controllers\Template\MessageLibrary\EditController::class)->name('edit');
+	Route::patch('{message}', \Egent\Setting\Http\Controllers\Template\MessageLibrary\UpdateController::class)->name('update');
+	Route::get('{message}/delete', \Egent\Setting\Http\Controllers\Template\MessageLibrary\DeleteController::class)->name('delete');
+	Route::delete('{message}', \Egent\Setting\Http\Controllers\Template\MessageLibrary\DestroyController::class)->name('destroy');
+});
+
 Route::group([
 	'prefix' => 'settings/messages',
 	'as' => 'settings.messages.'
@@ -48,6 +64,7 @@ Route::group([
 	Route::get('{template}/delete', \Egent\Setting\Http\Controllers\Template\DeleteController::class)->name('delete');
 	Route::delete('{template}', \Egent\Setting\Http\Controllers\Template\DestroyController::class)->name('destroy');
 });
+
 
 Route::group([
 	'prefix' => 'settings/transaction-coordinator',
