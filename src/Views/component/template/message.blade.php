@@ -18,7 +18,7 @@
             </div>
         </div>
         <select>
-            @foreach($user->messageLibraries as $entity)
+            @foreach($user->settingMessageLibraries as $entity)
                 <option>{{ $entity->name }}</option>
             @endforeach
         </select>

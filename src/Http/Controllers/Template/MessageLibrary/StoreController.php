@@ -29,18 +29,18 @@ class StoreController extends Controller
 		]);
 		$validator->validate();
 		$data = $validator->validated();
-	    if ($user->messageLibraries()->where('name', $data['name'])->count()) {
+	    if ($user->settingMessageLibraries()->where('name', $data['name'])->count()) {
 		    throw ValidationException::withMessages(['name' => 'This name must be unique.']);
 	    }
 
 	    /**
 	     * Just putting a stop in here.  Eventually we need to open this up, but I want to stop it for now.
 	     */
-		if ($user->messageLibraries->count() > 10) {
+		if ($user->settingMessageLibraries->count() > 10) {
 			throw ValidationException::withMessages(['name' => 'You have reached the maximum number of message libraries.']);
 		}
 
-	    $entity = $user->messageLibraries()->create($data);
+	    $entity = $user->settingMessageLibraries()->create($data);
 
 		if ($request->wantsJson()) {
 			return response()->json($entity);

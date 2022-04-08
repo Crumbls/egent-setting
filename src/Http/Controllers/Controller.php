@@ -13,7 +13,7 @@ class Controller extends BaseController
      */
     public function __construct()
     {
-        view()->startPush('js', sprintf('<script src="%s" defer></script>', asset('/js/setting.js')));
 	    view()->startPush('css', view('laravel-trix::trixassets')->render());
+        view()->startPush('js', sprintf('<script src="%s" defer></script>', asset('/js/setting.js')));
     }
 }

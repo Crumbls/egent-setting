@@ -4,6 +4,7 @@ namespace Egent\Setting\Http\Controllers\Template\Message;
 
 use Egent\Setting\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class IndexController extends Controller
 {
@@ -17,6 +18,19 @@ class IndexController extends Controller
 	    $user = \Auth::user();
 	    abort_if(!$user, 403);
 
-	    return view('setting::template.message.index', ['user' => $user]);
+		$validator = Validator::make($request->all(), [
+			'library' => ['sometimes','numeric']
+		]);
+		$input = $validator->validated();
+
+		$data = [];
+
+		if (array_key_exists('library', $input)) {
+			$data['entities'] = $user->settingMessages()->where('library_id', $input['library'])->get();
+		} else {
+			$data['entities'] = $user->settingMessages;
+		}
+
+		return response()->json($data);
     }
 }

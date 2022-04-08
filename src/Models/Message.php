@@ -24,16 +24,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * @internal
  */
-class MessageLibary extends Model
+class Message extends Model
 {
-	protected $fillable = ['name'];
+	protected $fillable = ['*'];
 
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'user_message_libraries';
+    protected $table = 'user_messages';
 
 	/**
 	 * User
@@ -41,5 +41,13 @@ class MessageLibary extends Model
 	 */
 	public function user() : BelongsTo {
 		return $this->belongsTo(User::class);
+	}
+
+	/**
+	 * User
+	 * @return BelongsTo
+	 */
+	public function messageLibrary() : BelongsTo {
+		return $this->belongsTo(MessageLibrary::class);
 	}
 }

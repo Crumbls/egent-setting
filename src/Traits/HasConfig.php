@@ -2,7 +2,8 @@
 
 namespace Egent\Setting\Traits;
 
-use Egent\Setting\Models\MessageLibary;
+use Egent\Setting\Models\Message;
+use Egent\Setting\Models\MessageLibrary;
 use Egent\Setting\Models\Setting;
 use Egent\Setting\Relationships\MorphManySettings;
 use Egent\Setting\Scopes\WhereConfig;
@@ -21,8 +22,15 @@ trait HasConfig
 	/**
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function messageLibraries() {
-		return $this->hasMany(MessageLibary::class);
+	public function settingMessages() {
+		return $this->hasMany(Message::class);
+	}
+
+	/**
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function settingMessageLibraries() {
+		return $this->hasMany(MessageLibrary::class);
 	}
 
     /**

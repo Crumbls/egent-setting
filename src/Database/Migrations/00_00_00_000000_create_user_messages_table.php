@@ -4,10 +4,10 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateUserMessageLibrariesTable extends Migration
+class CreateUserMessagesTable extends Migration
 {
 	public function getTable() : string {
-		return with(new \Egent\Setting\Models\MessageLibrary)->getTable();
+		return with(new \Egent\Setting\Models\Message())->getTable();
 	}
 	/**
 	 * Run the migrations.
@@ -23,7 +23,9 @@ class CreateUserMessageLibrariesTable extends Migration
 		Schema::create($table, function (Blueprint $table) {
 			$table->unsignedBigInteger('id')->autoIncrement();
 			$table->foreignIdFor(\App\Models\User::class)->nullable()->default(null);
-			$table->string('name',50)->nullable();
+			$table->foreignIdFor(\Egent\Setting\Models\MessageLibrary::class)->nullable()->default(null);
+			$table->string('title',50);
+			$table->text('message');
 			$table->timestamps();
 		});
 	}

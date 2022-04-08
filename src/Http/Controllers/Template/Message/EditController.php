@@ -5,6 +5,9 @@ namespace Egent\Setting\Http\Controllers\Template\Message;
 use Egent\Setting\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+/**
+ * @deprecated
+ */
 class EditController extends Controller
 {
 	
