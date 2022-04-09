@@ -19,18 +19,28 @@ class StoreController extends Controller
 	    abort_if(!$user, 403);
 
 		$validator = Validator::make($request->all(), [
-			'name' => [
+			'title' => [
 				'required',
 				'string',
 				'min:1',
 				'max:50'
+			],
+			'message' => [
+				'required',
+				'string',
+				'min:1',
+				'max:5024'
+			],
+			'library_id' => [
+				'required',
+				'numeric',
+				'in:'.$user->settingMessageLibraries->pluck('id')->implode(',')
 			]
 		]);
 		$validator->validate();
 		$data = $validator->validated();
+		$entity = $user->settingMessages()->create($data);
 
-
-	    flash('This feature is coming soon!.', 'success');
-		return redirect()->back();
+		return response()->json($entity);
     }
 }

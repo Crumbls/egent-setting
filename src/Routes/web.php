@@ -27,7 +27,7 @@ Route::group([
 //	Route::get('{message}', \Egent\Setting\Http\Controllers\Template\Message\ShowController::class)->name('show');
 //	Route::get('{message}/edit', \Egent\Setting\Http\Controllers\Template\Message\EditController::class)->name('edit');
 	Route::patch('{message}', \Egent\Setting\Http\Controllers\Template\Message\UpdateController::class)->name('update');
-//	Route::get('{message}/delete', \Egent\Setting\Http\Controllers\Template\Message\DeleteController::class)->name('delete');
+	Route::get('{message}/delete', \Egent\Setting\Http\Controllers\Template\Message\DeleteController::class)->name('delete');
 	Route::delete('{message}', \Egent\Setting\Http\Controllers\Template\Message\DestroyController::class)->name('destroy');
 });
 

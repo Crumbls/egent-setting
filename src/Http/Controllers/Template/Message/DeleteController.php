@@ -3,11 +3,9 @@ namespace Egent\Setting\Http\Controllers\Template\Message;
 
 
 use Egent\Setting\Http\Controllers\Controller;
+use Egent\Setting\Models\Message;
 use Illuminate\Http\Request;
 
-/**
- * @deprecated
- */
 class DeleteController extends Controller
 {
 	
@@ -16,12 +14,25 @@ class DeleteController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request, Message $message)
     {
+	    abort_if(!$message->exists, 404);
 	    $user = \Auth::user();
 	    abort_if(!$user, 403);
+	    abort_if($message->user_id != $user->getKey(), 403);
 
-	    flash('This feature is coming soon!.', 'success');
-		return redirect()->back();
+		$url = url()->previous();
+		if ($url) {
+			if ($url == route('settings.templates.messages.delete', $message)) {
+				$url = false;
+			} else if ($url == route('settings.templates.messages.destroy', $message)) {
+				$url = false;
+			}
+		}
+		if (!$url) {
+			$url = route('settings.templates.index');
+		}
+
+		return view('setting::template.message.delete', ['message' => $message, 'redirectTo' => $url]);
     }
 }
