@@ -2,6 +2,7 @@
 
 namespace Egent\Setting\Traits;
 
+use Egent\Setting\Models\ListingTask;
 use Egent\Setting\Models\Message;
 use Egent\Setting\Models\MessageLibrary;
 use Egent\Setting\Models\Setting;
@@ -31,6 +32,13 @@ trait HasConfig
 	 */
 	public function settingMessageLibraries() {
 		return $this->hasMany(MessageLibrary::class);
+	}
+
+	/**
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function listingTasks() {
+		return $this->hasMany(ListingTask::class);
 	}
 
     /**

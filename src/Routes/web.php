@@ -30,6 +30,27 @@ Route::group([
 	Route::get('{message}/delete', \Egent\Setting\Http\Controllers\Template\Message\DeleteController::class)->name('delete');
 	Route::delete('{message}', \Egent\Setting\Http\Controllers\Template\Message\DestroyController::class)->name('destroy');
 });
+Route::get('settings/templates/listing-task-libraries', \Egent\Setting\Http\Controllers\Template\ListingTaskLibrary\IndexController::class)
+	->name('settings.templates.listing-task-libraries.index');
+Route::get('settings/templates/listing-task-libraries/{listingTaskLibrary}', \Egent\Setting\Http\Controllers\Template\ListingTaskLibrary\ShowController::class)
+	->name('settings.templates.listing-task-libraries.show');
+Route::patch('settings/templates/listing-task-libraries/{listingTaskLibrary}', \Egent\Setting\Http\Controllers\Template\ListingTaskLibrary\UpdateController::class)
+	->name('settings.templates.listing-task-libraries.update');
+
+Route::group([
+	'prefix' => 'settings/templates/listing-tasks',
+	'as' => 'settings.templates.listing-tasks.',
+//	'middleware' => ['developer']
+], function() {
+	Route::get('/', \Egent\Setting\Http\Controllers\Template\ListingTask\IndexController::class)->name('index');
+	Route::get('create', \Egent\Setting\Http\Controllers\Template\ListingTask\CreateController::class)->name('create');
+	Route::post('/', \Egent\Setting\Http\Controllers\Template\ListingTask\StoreController::class)->name('store');
+//	Route::get('{message}', \Egent\Setting\Http\Controllers\Template\ListingTask\ShowController::class)->name('show');
+//	Route::get('{message}/edit', \Egent\Setting\Http\Controllers\Template\ListingTask\EditController::class)->name('edit');
+	Route::patch('{message}', \Egent\Setting\Http\Controllers\Template\ListingTask\UpdateController::class)->name('update');
+	Route::get('{message}/delete', \Egent\Setting\Http\Controllers\Template\ListingTask\DeleteController::class)->name('delete');
+	Route::delete('{message}', \Egent\Setting\Http\Controllers\Template\ListingTask\DestroyController::class)->name('destroy');
+});
 
 Route::group([
 	'prefix' => 'settings/messages',
