@@ -115,7 +115,6 @@ class MorphManySettings extends MorphMany
      */
     public function initialize(bool $force = false): void
     {
-		echo __METHOD__.' '.__LINE__;
         if (!$force && $this->isInitialized()) {
             return;
         }
