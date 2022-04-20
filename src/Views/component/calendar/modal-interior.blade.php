@@ -5,7 +5,7 @@
     <p>@lang('Choose which provider you would like to connect your eCalendar with.')</p>
     <div class="md:flex space-x-4 space-y-4 justify-center">
         <?php
-        $drivers = \egentCalendar::getInstalledDrivers();
+        $drivers = \Calendar::getInstalledDrivers();
 		unset($drivers['Local']);
 		?>
         @foreach($drivers as $provider => $name)

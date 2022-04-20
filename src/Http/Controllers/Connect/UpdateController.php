@@ -28,7 +28,7 @@ class UpdateController extends Controller
 	    $user = \Auth::user();
 	    abort_if(!$user, 403);
 
-		$providers = \egentCalendar::getInstalledDrivers();
+		$providers = \Calendar::getInstalledDrivers();
 		unset($providers['Local']);
 		$providers = array_keys($providers);
 
@@ -42,7 +42,7 @@ class UpdateController extends Controller
 
 	    $validator->validate();
 	    $data = $validator->validated();
-		$driver = \egentCalendar::driver($data['provider']);
+		$driver = \Calendar::driver($data['provider']);
 
 		return $driver->initialize();
     }

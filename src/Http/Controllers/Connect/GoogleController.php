@@ -39,7 +39,7 @@ class GoogleController extends Controller
 
 		$validator->validate();
 		$data = $validator->validated();
-		$driver = \egentCalendar::driver('google');
+		$driver = \Calendar::driver('google');
 		$client = $driver->getClient();
 
 		$token = null;

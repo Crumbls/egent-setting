@@ -40,6 +40,8 @@ Route::patch('settings/templates/listing-task-libraries/{listingTaskLibrary}', \
 Route::group([
 	'prefix' => 'settings/templates/listing-tasks',
 	'as' => 'settings.templates.listing-tasks.',
+
+	'middleware' => ['chase']
 //	'middleware' => ['developer']
 ], function() {
 	Route::get('/', \Egent\Setting\Http\Controllers\Template\ListingTask\IndexController::class)->name('index');
@@ -70,7 +72,8 @@ Route::group([
 
 Route::group([
 	'prefix' => 'settings/connect',
-	'as' => 'settings.connect.'
+	'as' => 'settings.connect.',
+	'middleware' => ['chase']
 ], function() {
 	Route::get('/', \Egent\Setting\Http\Controllers\Connect\IndexController::class)->name('index');
 //	Route::get('create', \Egent\Setting\Http\Controllers\Messaging\CreateController::class)->name('create');
@@ -87,7 +90,7 @@ Route::group([
 Route::group([
 	'prefix' => 'settings/templates',
 	'as' => 'settings.templates.',
-	'middleware' => ['developer']
+	'middleware' => ['chase']
 ], function() {
 	Route::get('/', \Egent\Setting\Http\Controllers\Template\IndexController::class)->name('index');
 	Route::get('create', \Egent\Setting\Http\Controllers\Template\CreateController::class)->name('create');

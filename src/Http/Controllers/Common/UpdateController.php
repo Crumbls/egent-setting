@@ -201,6 +201,7 @@ class UpdateController extends Controller
 		// Remove extended.
 		unset($data['extended']);
 
+
 		// Convert to dot syntax for saving.
 		$data = \Arr::dot($data);
 		array_walk_recursive($data, [$this, 'save']);
@@ -215,6 +216,7 @@ class UpdateController extends Controller
 		if ($this->rules) {
 			return $this->rules;
 		}
+
 		$temp = with(new Metadata);
 		$table = $temp->getTable();
 		$connection = $temp->getConnection();
